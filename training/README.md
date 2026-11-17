@@ -123,8 +123,6 @@ model.eval()
 
 2D-FAP 输入 RGB、Resize(256)、CenterCrop(224)、ImageNet mean/std；模型输出 `[N,40]`，`score_outputs()` 返回 `[N]` 未取整期望分、`[N,5]` 模型预测评分分布。年龄输入约定如上，输出 logits `[N,101]`，对 dim=1 softmax 后按 0..100 求期望。
 
-> 注：v1.1 已从前后端主链路中移除 478 点像素平面几何与分性别统计模块，下列历史记录保留作为训练实验归档。
-
 ## SCUT-FBP5500 正式五折训练（2026-11-14）
 
 作者扩展数据包已下载、校验并解压。ZIP 为 404,749,186 bytes，SHA256：`99be9f950d3a908caf0c4a56da521fcd31680220aa4daa563912e651b8901942`；完整 ZIP 保留在 `training/data/SCUT-FBP5500.zip`。

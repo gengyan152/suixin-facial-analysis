@@ -60,31 +60,6 @@ def main():
         results[name] = json.loads((args.output/name/'roundtrip.json').read_text(encoding='utf-8'))
         results[name]['epochs'] = 2
         results[name]['workers'] = args.workers
-    # Statistics smoke uses synthetic landmarks only and must never be mounted as real evidence.
-    from verify_contracts import fixture_landmarks
-    points = fixture_landmarks()
-    entries = []
-    for i, name in enumerate(names):
-        changed = points.copy()
-        changed[98, 0] -= i*.15
-        changed[327, 0] += i*.15
-        entries.append({'filename': name, 'width': 300, 'height': 400,
-                        'landmarks': np.column_stack([changed/[300, 400], np.zeros(478)]).tolist()})
-    landmarks = args.output/'synthetic_landmarks.jsonl'
-    landmarks.write_text('\n'.join(json.dumps(r) for r in entries)+'\n', encoding='utf-8')
-    command = [sys.executable, str(ROOT/'compute_gender_stats.py'), '--images', str(images),
-               '--train-list', str(args.output/'scut/train.txt'), '--holdout-list', str(args.output/'scut/test.txt'),
-               '--landmarks-jsonl', str(landmarks), '--bootstraps', '100', '--output', str(args.output/'synthetic_gender_stats.json')]
-    subprocess.run(command, check=True, timeout=300)
-    stats = json.loads((args.output/'synthetic_gender_stats.json').read_text(encoding='utf-8'))
-    stats['synthetic_only'] = True
-    stats['source'] = 'Synthetic smoke fixtures, not real SCUT-FBP5500 measurements'
-    write_json(args.output/'synthetic_gender_stats.json', stats)
-    assert stats['input_counts'] == {'train': 8, 'holdout': 4}
-    assert not stats['excluded']
-    assert not any(m['display_trend'] for group in stats['splits']['train'].values() for m in group['metrics'].values())
-    results['gender_statistics'] = {'synthetic_only': True, 'train': 8, 'holdout': 4, 'excluded': 0,
-                                  'no_unsupported_display_trend': True}
     write_json(args.output/'verification.json', results)
     print(results, flush=True)
 

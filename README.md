@@ -12,7 +12,7 @@
 
 ![系统架构图](docs/assets/system_architecture.png)
 
-> 架构可编辑矢量源文件见 [`docs/assets/system_architecture.svg`](docs/assets/system_architecture.svg)。v1.1 版本已精简并移除旧版 478 点像素平面几何测量、分性别统计及 Grad-CAM / 局部模糊敏感性模块，聚焦端云协同的主链路分析体验。
+> 可编辑矢量源文件见 [`docs/assets/system_architecture.svg`](docs/assets/system_architecture.svg)。
 
 ---
 
