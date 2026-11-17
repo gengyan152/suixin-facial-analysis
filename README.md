@@ -85,7 +85,7 @@ python backend\scripts\prepare_age.py
 ### 3. 安装或构建 Android 客户端
 
 - **方式一：直接安装 Release APK（推荐）**
-  - 从本仓库 [Releases (v1.0)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.0) 下载 `随心一拍-1.0.apk`，通过 `adb install -r 随心一拍-1.0.apk` 或直接在手机上安装。
+  - 从本仓库 [Releases (v1.0)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.0) 下载 `suixin-1.0.apk`，通过 `adb install -r suixin-1.0.apk` 或直接在手机上安装。
 - **方式二：从源码构建**
   - 使用 Android Studio 打开 `android-app/` 目录编译运行，或在仓库根目录执行：
     ```powershell
