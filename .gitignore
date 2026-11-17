@@ -1,0 +1,45 @@
+# Toolchains, IDEs, local env overrides, and OS artifacts
+.toolchain/
+.local_env.ps1
+.env.local*
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Android build outputs and local config
+android-app/local.properties
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+*.apk
+
+# Python caches and virtual environments
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+.venv/
+venv/
+
+# Logs and local test-run outputs
+*.log
+backend/*.xml
+backend/tests/.tmp*/
+backend/gradcam_validation.json
+backend/http_smoke.json
+backend/live_probe.json
+backend/live_validation.json
+backend/openapi.json
+backend/text_development.json
+
+# Weights, datasets, and training artifacts
+backend/weights/
+training/_deps/
+training/artifacts/
+training/data/
+training/vendor/FPEM/
+training/vendor/**/*.pth
+training/vendor/**/.git/

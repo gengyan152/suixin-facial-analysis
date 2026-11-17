@@ -1,0 +1,205 @@
+{
+  "task_id": "offline_demo_female_01",
+  "image_id": "img_ae3b7c692ed64d81",
+  "status": "completed",
+  "is_offline_replay": true,
+  "model_versions": {
+    "beauty": "2d_fap_mobilenetv2 (trained_fold1)",
+    "age": "se_resnext50_appa_real (appa_real_pretrained)",
+    "text": "Idiap/FaceLLM-1B"
+  },
+  "generated_at": "2026-11-14T18:40:15.749930+08:00",
+  "rejection": null,
+  "selection": null,
+  "target_face": {
+    "face_id": "face_0",
+    "image_width": 512,
+    "image_height": 512,
+    "bbox_px": [
+      177,
+      62,
+      272,
+      177
+    ],
+    "bbox_norm": [
+      0.345703125,
+      0.12109375,
+      0.53125,
+      0.345703125
+    ],
+    "pose_deg": {
+      "yaw": -0.7093775574871942,
+      "pitch": 6.6052909563024516,
+      "roll": -2.851380129790619
+    },
+    "blur_laplacian_var": 869.3473932711593,
+    "brightness_mean": 155.20247139588102
+  },
+  "scores": {
+    "beauty_score": 2.2982871532440186,
+    "beauty_display": 2.3,
+    "scale_min": 1,
+    "scale_max": 5,
+    "distribution_label": "模型预测评分分布（1—5 档）",
+    "rating_probabilities": [
+      0.2656673192977905,
+      0.29922303557395935,
+      0.3130094110965729,
+      0.07688722014427185,
+      0.0452130101621151
+    ],
+    "distribution_std": 1.086157628101793,
+    "apparent_age": 28.631832122802734,
+    "apparent_age_display": 29,
+    "weights_ready": true,
+    "weights_status": "trained_fold1"
+  },
+  "geometry": {
+    "measurement_note": "基于转正像素平面并经双眼连线 Roll 水平对齐计算；首版测量中下庭比例（不含发际线上庭）。",
+    "mid_to_lower_face_ratio": 0.9390834418227172,
+    "five_eyes": {
+      "left_eye_to_face_ratio": 0.20741154402878256,
+      "intercanthal_to_face_ratio": 0.2461570922874332,
+      "right_eye_to_face_ratio": 0.20925941021833944,
+      "inner_canthus_to_eye_width_ratio": 1.1815418846855388
+    },
+    "brow_to_eye_ratio": 1.7646507982635269,
+    "nose_wing_to_intercanthal_ratio": 1.1432928015645256,
+    "upper_to_lower_lip_ratio": 0.47592600368066695,
+    "mirror_symmetry_score": 0.964800691923607,
+    "mirror_deviation_norm": 0.017599654038196518
+  },
+  "explanation": {
+    "original_image_url": "file:///android_asset/offline_demos/female_orig.jpg",
+    "landmarks_overlay_url": "file:///android_asset/offline_demos/female_landmarks.jpg",
+    "gradcam_overlay_url": "file:///android_asset/offline_demos/female_gradcam.jpg",
+    "random_baseline_mean_abs_delta": 0.19984714686870575,
+    "region_sensitivity": [
+      {
+        "region_key": "eyes",
+        "region_name": "眼部区域",
+        "perturbed_score": 2.037393569946289,
+        "delta_score": 0.26151132583618164,
+        "abs_delta": 0.26151132583618164,
+        "relative_to_random": 0.02784872055053711,
+        "is_sensitive": false
+      },
+      {
+        "region_key": "brows",
+        "region_name": "眉部区域",
+        "perturbed_score": 2.225126028060913,
+        "delta_score": 0.07377886772155762,
+        "abs_delta": 0.07377886772155762,
+        "relative_to_random": -0.28193607926368713,
+        "is_sensitive": false
+      },
+      {
+        "region_key": "nose",
+        "region_name": "鼻部区域",
+        "perturbed_score": 3.0385985374450684,
+        "delta_score": -0.7396936416625977,
+        "abs_delta": 0.7396936416625977,
+        "relative_to_random": 0.5765752047300339,
+        "is_sensitive": true
+      },
+      {
+        "region_key": "mouth",
+        "region_name": "嘴唇区域",
+        "perturbed_score": 2.4711952209472656,
+        "delta_score": -0.17229032516479492,
+        "abs_delta": 0.17229032516479492,
+        "relative_to_random": 0.05710259824991226,
+        "is_sensitive": true
+      },
+      {
+        "region_key": "contour",
+        "region_name": "脸部轮廓与下颌",
+        "perturbed_score": 2.424156904220581,
+        "delta_score": -0.12525200843811035,
+        "abs_delta": 0.12525200843811035,
+        "relative_to_random": -0.0062999725341796875,
+        "is_sensitive": false
+      }
+    ]
+  },
+  "text_analysis": {
+    "status": "ok",
+    "error_message": null,
+    "fields": {
+      "brows": {
+        "label": "眉部",
+        "description": "眉形呈弧形。",
+        "visible": true
+      },
+      "eyes": {
+        "label": "眼部",
+        "description": "眼睛睁开，眼裂轮廓可见。",
+        "visible": true
+      },
+      "nose": {
+        "label": "鼻部",
+        "description": "可见鼻部轮廓较圆润。",
+        "visible": true
+      },
+      "mouth": {
+        "label": "嘴部",
+        "description": "嘴部张开，可见牙齿。",
+        "visible": true
+      },
+      "contour": {
+        "label": "脸部轮廓",
+        "description": "可见面部轮廓偏椭圆。",
+        "visible": true
+      },
+      "expression": {
+        "label": "可见表情",
+        "description": "可见嘴角上扬，呈微笑表情。",
+        "visible": true
+      }
+    },
+    "narrative": "画面中的人物表观年龄约 29 岁，颜值评分为 2.3 分（满分 5.0 分），面容神态真实松弛，整体风格质朴自然。细看五官细节，脸部轮廓柔和偏椭圆，眉形柔和呈自然弧度，双眸自然舒展、眼型清晰，鼻头线条柔和圆润，唇齿微露，唇角轻扬带着浅浅笑意，整体面容舒展和谐。"
+  },
+  "gender_views": {
+    "general": {
+      "title": "通用综合参考",
+      "focus_keys": [
+        "eyes",
+        "nose",
+        "mouth",
+        "brows",
+        "contour",
+        "expression"
+      ],
+      "summary": "中下庭比 0.94，镜像对称度 96.5%；模型区域敏感性：鼻部区域、嘴唇区域。",
+      "evidence_note": "像素几何测量 + 模型区域敏感性 + 可见外观描述"
+    },
+    "female": {
+      "title": "女性侧重参考维度",
+      "focus_keys": [
+        "eyes",
+        "mouth",
+        "contour"
+      ],
+      "summary": "按课程任务书建议关注眼型、唇形和轮廓；当前上下唇厚度比 0.48。 训练集确认关联指标：左眼宽占面宽比(r=+0.33, q=0.000)、右眼宽占面宽比(r=+0.37, q=0.000)、左侧太阳穴占面宽比(r=-0.13, q=0.000)。",
+      "evidence_note": "课程任务书建议维度 + SCUT-FBP5500 训练集分组统计相关性（经留出折同方向确认与 BH 校正，非因果结论）。"
+    },
+    "male": {
+      "title": "男性侧重参考维度",
+      "focus_keys": [
+        "contour",
+        "brows",
+        "nose"
+      ],
+      "summary": "按课程任务书建议关注轮廓、眉眼和鼻部；当前眉眼比 1.76。 训练集确认关联指标：左眼宽占面宽比(r=+0.29, q=0.000)、内眦距占面宽比(r=-0.23, q=0.000)、右眼宽占面宽比(r=+0.32, q=0.000)。",
+      "evidence_note": "课程任务书建议维度 + SCUT-FBP5500 训练集分组统计相关性（经留出折同方向确认与 BH 校正，非因果结论）。"
+    }
+  },
+  "ethics_notice": "说明：颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计偏好，不代表客观美丑标准或个体价值；表观年龄为模型估计。本系统不做疾病诊断、性格命运推断或性取向预测。图像仅在本地演示设备内存处理并定时销毁，不上传公网云端。",
+  "timings_ms": {
+    "total_elapsed_ms": 7376.476200006437,
+    "gate_ms": 168.1780999933835,
+    "scores_ms": 26.171400008024648,
+    "explanation_ms": 109.93480001343414,
+    "text_ms": 7071.081499976572
+  }
+}

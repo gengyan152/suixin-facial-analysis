@@ -1,0 +1,16 @@
+# Observed 2026-11-14; Python 3.13.7; PyTorch wheels require the cu128 index.
+torch==2.8.0+cu128
+torchvision==0.23.0+cu128
+numpy==2.3.3
+scipy==1.16.3
+pandas==2.3.3
+Pillow==11.0.0
+opencv-python-headless==4.11.0.86
+pretrainedmodels==0.7.4
+imgaug==0.4.0
+scikit-image==0.26.0
+imageio==2.38.1
+shapely==2.2.0
+lazy-loader==0.6
+tifffile==2026.11.12
+mediapipe==1.2.3
