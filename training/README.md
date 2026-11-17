@@ -123,54 +123,9 @@ model.eval()
 
 2D-FAP 输入 RGB、Resize(256)、CenterCrop(224)、ImageNet mean/std；模型输出 `[N,40]`，`score_outputs()` 返回 `[N]` 未取整期望分、`[N,5]` 模型预测评分分布。年龄输入约定如上，输出 logits `[N,101]`，对 dim=1 softmax 后按 0..100 求期望。
 
-## 分性别几何统计
+> 注：v1.1 已从前后端主链路中移除 478 点像素平面几何与分性别统计模块，下列历史记录保留作为训练实验归档。
 
-原生几何提取使用 MediaPipe（本机当前可用版本 1.2.3）；官方固定 v1 Face Landmarker 模型已放在 `training/artifacts/weights/face_landmarker.task`。也支持由现有 Landmarker 导出的 JSONL，不需要安装第二套检测器。模型来源：`https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`。
-
-```powershell
-& $py training/compute_gender_stats.py --images "$scut/aligned" --train-list "$splits/cross_validation_1/train_1_aligned_ext.txt" --holdout-list "$splits/cross_validation_1/test_1_aligned_ext.txt" --landmarker training/artifacts/weights/face_landmarker.task --output training/artifacts/gender_stats.json
-# 缓存输入的替代方式
-# 将 --landmarker ... 替换为 --landmarks-jsonl training/data/scut_landmarks.jsonl
-```
-
-JSONL 每行：`{"filename":"AF1.jpg","width":300,"height":400,"landmarks":[[x,y,z],...478个点],"matrix":[...4x4...]}`。x/y 是与这张图像一致的归一化坐标，不能用裁剪图关键点搭配原图宽高。matrix 可省略，此时 `pose_checked=false` 明示未做姿态过滤。原生检测路径要求单脸，按矩阵过滤 |yaw|、|pitch| >25°。每个失败样本保留原因，不填零。
-
-仅根据数据集文件名前缀 AF/AM/CF/CM 使用官方性别分组，不通过图像推断性别。完整数据男女各 2750，单折训练集的分组数量根据列表实算。输出版本 `scut-geometry-v1`，主字段：
-
-```text
-splits.train.female.metrics.<指标>.pearson = {r,p,q_bh,ci95,valid_bootstraps}
-splits.train.female.metrics.<指标>.spearman = 同上
-splits.train.female.metrics.<指标>.supported
-splits.train.female.metrics.<指标>.holdout_confirmed
-splits.train.female.metrics.<指标>.display_trend
-splits.train.male... / splits.holdout...
-excluded / input_counts / bootstrap / train_list_sha256 / pose_checked
-```
-
-配对 bootstrap 默认 2000 次、95% percentile CI；BH 校正族涵盖两组性别、全部指标、两种相关系数，训练与留出分别校正。`display_trend=true` 要求两种系数方向一致、CI 不跨 0、q<.05，并且独立留出同方向支持。样本不足或常数指标输出 null；不杜撰趋势。`mirror_asymmetry` 越小表示二维几何越对称。
-
-## 几何定义与 478 点索引
-
-先 `(x*w,y*h)` 还原像素，眼中心连线水平旋转。面宽取完整面部轮廓与眼中心水平线的交点跨度，五眼输出五段各自/面宽。所有值来自二维像素平面，未使用归一化 z。中下庭不冒充真实发际线三庭。
-
-| 测量标志 | MediaPipe 索引 | 定义 |
-|---|---|---|
-| 图像左眼外/内眦 | 33 / 133 | 左眼裂宽 |
-| 图像右眼内/外眦 | 362 / 263 | 右眼裂宽；133→362 为内眦距 |
-| 双眼上/下缘 | 159/145、386/374 | 眼裂高度 |
-| 双眉下缘采样 | 52、65 / 282、295 | 两点平均至相应眼中心垂距/眼裂高 |
-| 眉心、鼻下、颏底 | 9、2、152 | 9→2 中庭 / 2→152 下庭，2 为网格鼻下代理点 |
-| 鼻翼 | 98、327 | 水平宽/内眦距 |
-| 上唇、下唇 | 0→13、14→17 | 垂直厚度比 |
-| 嘴角 | 61、291 | 对称点对 |
-| 中轴拟合 | 168、6、2、152 | 总最小二乘/SVD 拟合二维直线 |
-| 对称度 | 33↔263、133↔362、159↔386、145↔374、52↔282、65↔295、98↔327、61↔291、234↔454、172↔397 | 镜像后的二维距离均值/双外眦距 |
-
-完整轮廓索引和定义以 `geometry.LANDMARKS` 为唯一实现来源，也嵌入统计 JSON。478 点与其他 68/106 点拓扑不存在通用一一索引映射；后端若接入其他模型，需按其具体拓扑补充映射并验证。拒绝点序反转、退化分母、缺少眼水平轮廓交点、非有限坐标等输入。
-
-正式评测前应目视核查这些网格代理点与人脸解剖部位的一致性，尤其鼻下、眉心及唇缘；本交付已验证数学旋转不变性，尚未在 SCUT 全量网格上做人工核查。
-
-## SCUT-FBP5500 正式五折训练与挂载（2026-11-14）
+## SCUT-FBP5500 正式五折训练（2026-11-14）
 
 作者扩展数据包已下载、校验并解压。ZIP 为 404,749,186 bytes，SHA256：`99be9f950d3a908caf0c4a56da521fcd31680220aa4daa563912e651b8901942`；完整 ZIP 保留在 `training/data/SCUT-FBP5500.zip`。
 

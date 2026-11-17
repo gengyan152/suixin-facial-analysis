@@ -1,7 +1,6 @@
 package com.jlu.facialanalysis
 
 import com.jlu.facialanalysis.data.model.ApiJsonParser
-import com.jlu.facialanalysis.data.model.GenderViewKey
 import com.jlu.facialanalysis.data.network.BackendApiClient
 import com.jlu.facialanalysis.vision.PreviewCoordinateMapper
 import org.junit.Assert.assertEquals
@@ -28,8 +27,6 @@ class ApiContractAndMapperTest {
                 "detail": "0 human candidates"
               },
               "scores": null,
-              "geometry": null,
-              "explanation": null,
               "text_analysis": null
             }
         """.trimIndent()
@@ -41,7 +38,6 @@ class ApiContractAndMapperTest {
         assertEquals("NO_HUMAN_FACE", parsed.rejection?.code)
         assertEquals("未识别到人脸", parsed.rejection?.message)
         assertNull(parsed.scores)
-        assertNull(parsed.geometry)
         assertNull(parsed.textAnalysis)
     }
 
@@ -127,8 +123,8 @@ class ApiContractAndMapperTest {
     @Test
     fun `artifact url resolver handles relative http and android_asset paths and blocks public hosts`() {
         assertEquals(
-            "http://127.0.0.1:8000/api/v1/tasks/t1/artifacts/gradcam_overlay.jpg",
-            BackendApiClient.resolveArtifactUrl("127.0.0.1:8000/", "/api/v1/tasks/t1/artifacts/gradcam_overlay.jpg")
+            "http://127.0.0.1:8000/api/v1/tasks/t1/artifacts/normalized.jpg",
+            BackendApiClient.resolveArtifactUrl("127.0.0.1:8000/", "/api/v1/tasks/t1/artifacts/normalized.jpg")
         )
         assertEquals(
             "http://192.168.43.100:8000/api/v1/tasks/t1/artifacts/normalized.jpg",
@@ -138,7 +134,6 @@ class ApiContractAndMapperTest {
             "file:///android_asset/offline_demos/female_orig.jpg",
             BackendApiClient.resolveArtifactUrl("http://127.0.0.1:8000", "file:///android_asset/offline_demos/female_orig.jpg")
         )
-        // Public host must be blocked in both resolveArtifactUrl and normalizeBaseUrl
         assertNull(
             BackendApiClient.resolveArtifactUrl("http://127.0.0.1:8000", "https://example.org/photo.jpg")
         )
@@ -195,18 +190,12 @@ class ApiContractAndMapperTest {
                 assertEquals("NO_HUMAN_FACE", parsed.rejection?.code)
                 assertEquals("未识别到人脸", parsed.rejection?.message)
                 assertNull(parsed.scores)
-                assertNull(parsed.explanation)
                 assertNotNull(parsed.rejection?.previewImageUrl)
             }
             if (name == "demo_female_ok.json" || name == "demo_male_ok.json") {
-                assertEquals(3, parsed.genderViews.size)
-                assertTrue(parsed.genderViews.containsKey(GenderViewKey.FEMALE))
+                assertNotNull(parsed.originalImageUrl)
                 assertTrue("Expected trained 2D-FAP weightsReady=true in $name", parsed.scores?.weightsReady == true)
                 assertEquals("trained_fold1", parsed.scores?.weightsStatus)
-                assertTrue(
-                    "Expected real SCUT-FBP5500 confirmed correlation trend in $name",
-                    parsed.genderViews[GenderViewKey.FEMALE]?.summary?.contains("训练集确认关联指标") == true
-                )
             }
         }
     }
@@ -215,9 +204,7 @@ class ApiContractAndMapperTest {
     fun `real backend http_smoke json parses cleanly in Kotlin ApiJsonParser`() {
         val smokeCandidates = listOf(
             File("src/test/resources/http_smoke.json"),
-            File("app/src/test/resources/http_smoke.json"),
-            File("../backend/http_smoke.json"),
-            File("../../backend/http_smoke.json")
+            File("app/src/test/resources/http_smoke.json")
         )
         val smokeFile = smokeCandidates.firstOrNull { it.exists() }
         assertNotNull("http_smoke.json fixture must exist for cross-stack contract test", smokeFile)
@@ -229,20 +216,16 @@ class ApiContractAndMapperTest {
         assertEquals(120, health.ttlSeconds)
         assertTrue(health.models.any { it.name == "apparent_age" && it.loaded })
         assertTrue(health.models.any { it.name == "beauty_2dfap" && it.loaded && it.weightsStatus == "trained_fold1" })
-        assertTrue(health.models.any { it.name == "gender_stats" && it.loaded })
 
         val result = ApiJsonParser.parseTaskResult(root.getJSONObject("result").toString())
         assertEquals("completed", result.status)
         assertTrue(result.isTerminal)
+        assertNotNull(result.originalImageUrl)
         assertNotNull(result.scores)
         assertTrue(result.scores?.weightsReady == true)
         assertEquals("trained_fold1", result.scores?.weightsStatus)
         assertEquals(5, result.scores?.ratingProbabilities?.size)
-        assertNotNull(result.geometry)
-        assertNotNull(result.explanation)
-        assertEquals(5, result.explanation?.regionSensitivity?.size)
         assertEquals(6, result.textAnalysis?.fields?.size)
-        assertEquals(3, result.genderViews.size)
         val desc = result.buildUnifiedDescription()
         assertTrue("Unified narrative must contain age and beauty score", desc.contains("岁") && desc.contains("分"))
     }

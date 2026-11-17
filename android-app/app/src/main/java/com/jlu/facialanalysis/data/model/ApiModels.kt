@@ -3,23 +3,6 @@ package com.jlu.facialanalysis.data.model
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class GenderViewKey(val wireName: String, val tabLabel: String) {
-    GENERAL("general", "通用视图"),
-    FEMALE("female", "女性侧重"),
-    MALE("male", "男性侧重");
-
-    companion object {
-        fun fromWire(value: String?): GenderViewKey =
-            entries.firstOrNull { it.wireName == value } ?: GENERAL
-    }
-}
-
-enum class OverlayLayer(val label: String) {
-    ORIGINAL("原图"),
-    LANDMARKS("478点网格"),
-    GRADCAM("Grad-CAM热力图")
-}
-
 data class ModelHealthItem(
     val name: String,
     val loaded: Boolean,
@@ -97,42 +80,6 @@ data class ScoresPayload(
     val weightsStatus: String = "untrained_init"
 )
 
-data class FiveEyesMetrics(
-    val leftEyeToFaceRatio: Float,
-    val intercanthalToFaceRatio: Float,
-    val rightEyeToFaceRatio: Float,
-    val innerCanthusToEyeWidthRatio: Float
-)
-
-data class GeometryPayload(
-    val measurementNote: String,
-    val midToLowerFaceRatio: Float,
-    val fiveEyes: FiveEyesMetrics,
-    val browToEyeRatio: Float,
-    val noseWingToIntercanthalRatio: Float,
-    val upperToLowerLipRatio: Float,
-    val mirrorSymmetryScore: Float,
-    val mirrorDeviationNorm: Float
-)
-
-data class RegionSensitivityItem(
-    val regionKey: String,
-    val regionName: String,
-    val perturbedScore: Float,
-    val deltaScore: Float,
-    val absDelta: Float,
-    val relativeToRandom: Float,
-    val isSensitive: Boolean
-)
-
-data class ExplanationPayload(
-    val originalImageUrl: String?,
-    val landmarksOverlayUrl: String?,
-    val gradcamOverlayUrl: String?,
-    val randomBaselineMeanAbsDelta: Float,
-    val regionSensitivity: List<RegionSensitivityItem>
-)
-
 data class FeatureFieldObservation(
     val key: String,
     val label: String,
@@ -147,14 +94,6 @@ data class TextAnalysisPayload(
     val narrative: String? = null
 )
 
-data class GenderViewBlock(
-    val key: GenderViewKey,
-    val title: String,
-    val focusKeys: List<String>,
-    val summary: String,
-    val evidenceNote: String
-)
-
 data class TaskResult(
     val taskId: String,
     val imageId: String,
@@ -162,14 +101,12 @@ data class TaskResult(
     val isOfflineReplay: Boolean,
     val modelVersionsSummary: String?,
     val generatedAt: String?,
+    val originalImageUrl: String?,
     val rejection: RejectionInfo?,
     val selection: SelectionPayload?,
     val targetFace: TargetFaceInfo?,
     val scores: ScoresPayload?,
-    val geometry: GeometryPayload?,
-    val explanation: ExplanationPayload?,
     val textAnalysis: TextAnalysisPayload?,
-    val genderViews: Map<GenderViewKey, GenderViewBlock>,
     val ethicsNotice: String,
     val timingsMs: Map<String, Float>
 ) {
@@ -351,51 +288,6 @@ object ApiJsonParser {
             )
         }
 
-        val geometry = root.optJSONObject("geometry")?.let { geo ->
-            val fe = geo.optJSONObject("five_eyes") ?: JSONObject()
-            GeometryPayload(
-                measurementNote = geo.optString("measurement_note", ""),
-                midToLowerFaceRatio = geo.optDouble("mid_to_lower_face_ratio", 0.0).toFloat(),
-                fiveEyes = FiveEyesMetrics(
-                    leftEyeToFaceRatio = fe.optDouble("left_eye_to_face_ratio", 0.0).toFloat(),
-                    intercanthalToFaceRatio = fe.optDouble("intercanthal_to_face_ratio", 0.0).toFloat(),
-                    rightEyeToFaceRatio = fe.optDouble("right_eye_to_face_ratio", 0.0).toFloat(),
-                    innerCanthusToEyeWidthRatio = fe.optDouble("inner_canthus_to_eye_width_ratio", 0.0).toFloat()
-                ),
-                browToEyeRatio = geo.optDouble("brow_to_eye_ratio", 0.0).toFloat(),
-                noseWingToIntercanthalRatio = geo.optDouble("nose_wing_to_intercanthal_ratio", 0.0).toFloat(),
-                upperToLowerLipRatio = geo.optDouble("upper_to_lower_lip_ratio", 0.0).toFloat(),
-                mirrorSymmetryScore = geo.optDouble("mirror_symmetry_score", 0.0).toFloat(),
-                mirrorDeviationNorm = geo.optDouble("mirror_deviation_norm", 0.0).toFloat()
-            )
-        }
-
-        val explanation = root.optJSONObject("explanation")?.let { exp ->
-            val sensList = mutableListOf<RegionSensitivityItem>()
-            val arr = exp.optJSONArray("region_sensitivity") ?: JSONArray()
-            for (i in 0 until arr.length()) {
-                val r = arr.getJSONObject(i)
-                sensList.add(
-                    RegionSensitivityItem(
-                        regionKey = r.optString("region_key", ""),
-                        regionName = r.optString("region_name", ""),
-                        perturbedScore = r.optDouble("perturbed_score", 0.0).toFloat(),
-                        deltaScore = r.optDouble("delta_score", 0.0).toFloat(),
-                        absDelta = r.optDouble("abs_delta", 0.0).toFloat(),
-                        relativeToRandom = r.optDouble("relative_to_random", 0.0).toFloat(),
-                        isSensitive = r.optBoolean("is_sensitive", false)
-                    )
-                )
-            }
-            ExplanationPayload(
-                originalImageUrl = exp.optString("original_image_url", "").ifBlank { null },
-                landmarksOverlayUrl = exp.optString("landmarks_overlay_url", "").ifBlank { null },
-                gradcamOverlayUrl = exp.optString("gradcam_overlay_url", "").ifBlank { null },
-                randomBaselineMeanAbsDelta = exp.optDouble("random_baseline_mean_abs_delta", 0.0).toFloat(),
-                regionSensitivity = sensList
-            )
-        }
-
         val textAnalysis = root.optJSONObject("text_analysis")?.let { ta ->
             val orderedKeys = listOf(
                 "brows" to "眉部",
@@ -423,20 +315,6 @@ object ApiJsonParser {
             )
         }
 
-        val genderViews = mutableMapOf<GenderViewKey, GenderViewBlock>()
-        root.optJSONObject("gender_views")?.let { gv ->
-            for (gKey in GenderViewKey.entries) {
-                val block = gv.optJSONObject(gKey.wireName) ?: continue
-                genderViews[gKey] = GenderViewBlock(
-                    key = gKey,
-                    title = block.optString("title", gKey.tabLabel),
-                    focusKeys = block.optJSONArray("focus_keys").toStringList(),
-                    summary = block.optString("summary", ""),
-                    evidenceNote = block.optString("evidence_note", "")
-                )
-            }
-        }
-
         val versionsSummary = root.optJSONObject("model_versions")?.let { mv ->
             listOfNotNull(
                 mv.optString("beauty", "").takeIf { it.isNotBlank() },
@@ -461,17 +339,15 @@ object ApiJsonParser {
             isOfflineReplay = root.optBoolean("is_offline_replay", false),
             modelVersionsSummary = versionsSummary,
             generatedAt = root.optString("generated_at", "").ifBlank { null },
+            originalImageUrl = root.optString("original_image_url", "").takeIf { it.isNotBlank() && it != "null" },
             rejection = rejection,
             selection = selection,
             targetFace = targetFace,
             scores = scores,
-            geometry = geometry,
-            explanation = explanation,
             textAnalysis = textAnalysis,
-            genderViews = genderViews,
             ethicsNotice = root.optString(
                 "ethics_notice",
-                "颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计趋势，不代表客观美丑标准或个人价值；图像仅在本地设备内存处理并定时销毁。"
+                "颜值评分与表观年龄仅反映特定公开数据集标注群体的主观统计趋势，不代表客观美丑标准或个人价值；图像仅在本地设备内存处理并定时销毁。"
             ),
             timingsMs = timings
         )
@@ -485,11 +361,6 @@ object ApiJsonParser {
     private fun JSONArray?.toFloatList(): List<Float> {
         if (this == null) return emptyList()
         return (0 until length()).map { optDouble(it, 0.0).toFloat() }
-    }
-
-    private fun JSONArray?.toStringList(): List<String> {
-        if (this == null) return emptyList()
-        return (0 until length()).map { optString(it, "") }.filter { it.isNotBlank() }
     }
 
     private fun JSONObject.optNullableFloat(key: String): Float? {

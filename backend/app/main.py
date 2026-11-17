@@ -20,7 +20,7 @@ def create_app(settings=None,pipeline=None):
         yield
         await run_in_threadpool(service.close)
 
-    app=FastAPI(title="Local Face Analysis",version="1.0",lifespan=lifespan)
+    app=FastAPI(title="Local Face Analysis",version="1.1",lifespan=lifespan)
     app.state.service=service
 
     @app.exception_handler(ServiceError)

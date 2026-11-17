@@ -31,10 +31,8 @@ def main():
                 context=pipeline.target(image,c)
                 print("QUALITY",context["target_face"],flush=True)
                 scores=pipeline.scores(context)
-                explanation,artifacts=pipeline.explanation(image,context)
                 fields=pipeline.describe(context)
-                report[name].update(scores=scores,target=context["target_face"],geometry=context["geometry"],fields=fields,
-                                    explanation=explanation,artifacts_bytes={k:len(v) for k,v in artifacts.items()})
+                report[name].update(scores=scores,target=context["target_face"],fields=fields)
                 print("FULL",json.dumps(report[name],ensure_ascii=True),flush=True)
     pipeline.warmup()
     report["warmup"]=pipeline.warmup_metrics

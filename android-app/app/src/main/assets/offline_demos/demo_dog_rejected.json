@@ -14,13 +14,11 @@
   "selection": null,
   "target_face": null,
   "scores": null,
-  "geometry": null,
-  "explanation": null,
   "text_analysis": null,
-  "gender_views": null,
   "ethics_notice": "说明：颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计偏好，不代表客观美丑标准或个体价值；表观年龄为模型估计。本系统不做疾病诊断、性格命运推断或性取向预测。图像仅在本地演示设备内存处理并定时销毁，不上传公网云端。",
   "timings_ms": {
     "total_elapsed_ms": 39.99730001669377,
     "gate_ms": 39.710499986540526
-  }
+  },
+  "original_image_url": null
 }

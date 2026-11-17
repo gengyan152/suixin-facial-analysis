@@ -54,74 +54,6 @@
     "weights_ready": true,
     "weights_status": "trained_fold1"
   },
-  "geometry": {
-    "measurement_note": "基于转正像素平面并经双眼连线 Roll 水平对齐计算；首版测量中下庭比例（不含发际线上庭）。",
-    "mid_to_lower_face_ratio": 0.9390834418227172,
-    "five_eyes": {
-      "left_eye_to_face_ratio": 0.20741154402878256,
-      "intercanthal_to_face_ratio": 0.2461570922874332,
-      "right_eye_to_face_ratio": 0.20925941021833944,
-      "inner_canthus_to_eye_width_ratio": 1.1815418846855388
-    },
-    "brow_to_eye_ratio": 1.7646507982635269,
-    "nose_wing_to_intercanthal_ratio": 1.1432928015645256,
-    "upper_to_lower_lip_ratio": 0.47592600368066695,
-    "mirror_symmetry_score": 0.964800691923607,
-    "mirror_deviation_norm": 0.017599654038196518
-  },
-  "explanation": {
-    "original_image_url": "file:///android_asset/offline_demos/female_orig.jpg",
-    "landmarks_overlay_url": "file:///android_asset/offline_demos/female_landmarks.jpg",
-    "gradcam_overlay_url": "file:///android_asset/offline_demos/female_gradcam.jpg",
-    "random_baseline_mean_abs_delta": 0.19984714686870575,
-    "region_sensitivity": [
-      {
-        "region_key": "eyes",
-        "region_name": "眼部区域",
-        "perturbed_score": 2.037393569946289,
-        "delta_score": 0.26151132583618164,
-        "abs_delta": 0.26151132583618164,
-        "relative_to_random": 0.02784872055053711,
-        "is_sensitive": false
-      },
-      {
-        "region_key": "brows",
-        "region_name": "眉部区域",
-        "perturbed_score": 2.225126028060913,
-        "delta_score": 0.07377886772155762,
-        "abs_delta": 0.07377886772155762,
-        "relative_to_random": -0.28193607926368713,
-        "is_sensitive": false
-      },
-      {
-        "region_key": "nose",
-        "region_name": "鼻部区域",
-        "perturbed_score": 3.0385985374450684,
-        "delta_score": -0.7396936416625977,
-        "abs_delta": 0.7396936416625977,
-        "relative_to_random": 0.5765752047300339,
-        "is_sensitive": true
-      },
-      {
-        "region_key": "mouth",
-        "region_name": "嘴唇区域",
-        "perturbed_score": 2.4711952209472656,
-        "delta_score": -0.17229032516479492,
-        "abs_delta": 0.17229032516479492,
-        "relative_to_random": 0.05710259824991226,
-        "is_sensitive": true
-      },
-      {
-        "region_key": "contour",
-        "region_name": "脸部轮廓与下颌",
-        "perturbed_score": 2.424156904220581,
-        "delta_score": -0.12525200843811035,
-        "abs_delta": 0.12525200843811035,
-        "relative_to_random": -0.0062999725341796875,
-        "is_sensitive": false
-      }
-    ]
-  },
   "text_analysis": {
     "status": "ok",
     "error_message": null,
@@ -159,47 +91,12 @@
     },
     "narrative": "画面中的人物表观年龄约 29 岁，颜值评分为 2.3 分（满分 5.0 分），面容神态真实松弛，整体风格质朴自然。细看五官细节，脸部轮廓柔和偏椭圆，眉形柔和呈自然弧度，双眸自然舒展、眼型清晰，鼻头线条柔和圆润，唇齿微露，唇角轻扬带着浅浅笑意，整体面容舒展和谐。"
   },
-  "gender_views": {
-    "general": {
-      "title": "通用综合参考",
-      "focus_keys": [
-        "eyes",
-        "nose",
-        "mouth",
-        "brows",
-        "contour",
-        "expression"
-      ],
-      "summary": "中下庭比 0.94，镜像对称度 96.5%；模型区域敏感性：鼻部区域、嘴唇区域。",
-      "evidence_note": "像素几何测量 + 模型区域敏感性 + 可见外观描述"
-    },
-    "female": {
-      "title": "女性侧重参考维度",
-      "focus_keys": [
-        "eyes",
-        "mouth",
-        "contour"
-      ],
-      "summary": "按课程任务书建议关注眼型、唇形和轮廓；当前上下唇厚度比 0.48。 训练集确认关联指标：左眼宽占面宽比(r=+0.33, q=0.000)、右眼宽占面宽比(r=+0.37, q=0.000)、左侧太阳穴占面宽比(r=-0.13, q=0.000)。",
-      "evidence_note": "课程任务书建议维度 + SCUT-FBP5500 训练集分组统计相关性（经留出折同方向确认与 BH 校正，非因果结论）。"
-    },
-    "male": {
-      "title": "男性侧重参考维度",
-      "focus_keys": [
-        "contour",
-        "brows",
-        "nose"
-      ],
-      "summary": "按课程任务书建议关注轮廓、眉眼和鼻部；当前眉眼比 1.76。 训练集确认关联指标：左眼宽占面宽比(r=+0.29, q=0.000)、内眦距占面宽比(r=-0.23, q=0.000)、右眼宽占面宽比(r=+0.32, q=0.000)。",
-      "evidence_note": "课程任务书建议维度 + SCUT-FBP5500 训练集分组统计相关性（经留出折同方向确认与 BH 校正，非因果结论）。"
-    }
-  },
   "ethics_notice": "说明：颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计偏好，不代表客观美丑标准或个体价值；表观年龄为模型估计。本系统不做疾病诊断、性格命运推断或性取向预测。图像仅在本地演示设备内存处理并定时销毁，不上传公网云端。",
   "timings_ms": {
     "total_elapsed_ms": 7376.476200006437,
     "gate_ms": 168.1780999933835,
     "scores_ms": 26.171400008024648,
-    "explanation_ms": 109.93480001343414,
     "text_ms": 7071.081499976572
-  }
+  },
+  "original_image_url": "file:///android_asset/offline_demos/female_orig.jpg"
 }

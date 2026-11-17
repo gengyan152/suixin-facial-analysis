@@ -15,10 +15,10 @@
 - `training/`：PyTorch 复现训练（`2D-FAP` MobileNetV2、`APPA-REAL` SE-ResNeXt-50、MediaPipe 478 点统计）。
 
 ## 目录与契约约定
-- 前后端接口契约见 `docs/API_CONTRACT.md`，478 点几何定义见 `docs/LANDMARK_MAPPING.md`。
+- 前后端接口契约见 `docs/API_CONTRACT.md`。
 - 图片上传使用原始二进制体（`<= 8 MB`），纯内存处理并设 `120s` TTL，不落盘临时图片。
 - 模型权重统一放置于 `backend/weights/`（不入库）；`backend/app/config.py` 启动前固定 `HF_HOME`、`TORCH_HOME` 至该目录且推理禁用在线请求。
 - `2D-FAP` / `APPA-REAL` 权重交接仅使用纯 `state_dict`（`weights_only=True, strict=True`）；年龄模型输入保持 BGR `0-255 float32`。
 
 ## 当前状态
-- 前后端与 `SCUT-FBP5500` 五折训练及分性别统计闭环已完成；正在执行 GitHub 仓库整理与文档收尾。
+- v1.1 已移除已弃用的 478 点像素平面几何、Grad-CAM 与局部模糊敏感性模块；保留人脸门禁、质量校验、颜值/表观年龄评估与 FaceLLM 六字段中文描述主链路。

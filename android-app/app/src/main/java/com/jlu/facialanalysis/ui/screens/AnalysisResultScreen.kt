@@ -72,7 +72,7 @@ fun AnalysisResultScreen(
 ) {
     val result = uiState.taskResult
     val primaryPhotoModel: Any? = uiState.localPreviewBytes
-        ?: resolveUrl(result?.explanation?.originalImageUrl)
+        ?: resolveUrl(result?.originalImageUrl)
         ?: resolveUrl(result?.rejection?.previewImageUrl)
         ?: resolveUrl(result?.selection?.previewImageUrl)
 

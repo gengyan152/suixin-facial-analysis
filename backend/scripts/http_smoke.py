@@ -42,9 +42,8 @@ def main():
             assert result['status']=='completed',result
             report['stages']=stages
             report['result']=result
-            for key in ('original_image_url','landmarks_overlay_url','gradcam_overlay_url'):
-                response=session.get(base+result['explanation'][key],timeout=3)
-                assert response.status_code==200 and response.headers['Cache-Control']=='no-store'
+            response=session.get(base+result['original_image_url'],timeout=3)
+            assert response.status_code==200 and response.headers['Cache-Control']=='no-store'
             response=session.delete(base+'/api/v1/tasks/'+task['task_id'],timeout=3)
             assert response.json()['deleted']
             assert session.get(base+'/api/v1/tasks/'+task['task_id'],timeout=3).status_code==404

@@ -63,11 +63,6 @@ class NumericalModels:
     def beauty_tensor(self, image):
         return self.transform(Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
 
-    def beauty_batch(self, images):
-        with torch.no_grad():
-            probabilities = self.beauty(torch.stack([self.beauty_tensor(image) for image in images]).to(self.device))
-            return (probabilities * self.rank).sum(1).cpu().numpy()
-
     def score(self, image):
         with torch.no_grad():
             distribution = self.beauty(self.beauty_tensor(image).unsqueeze(0).to(self.device))[0]
@@ -80,32 +75,3 @@ class NumericalModels:
                 "distribution_label": "模型预测评分分布（1—5 档）", "rating_probabilities": bins,
                 "distribution_std": std, "apparent_age": age, "apparent_age_display": int(age+.5),
                 "weights_ready": self.beauty_status != "untrained_init", "weights_status": self.beauty_status}
-
-    def gradcam(self, image):
-        activation, gradients, handles = [], [], []
-        self.beauty.zero_grad(set_to_none=True)
-        def capture(module, args, output):
-            activation.append(output)
-            handles.append(output.register_hook(lambda grad: gradients.append(grad)))
-        handles.append(self.beauty.features[-1].register_forward_hook(capture))
-        try:
-            with torch.enable_grad():
-                tensor = self.beauty_tensor(image).unsqueeze(0).to(self.device).requires_grad_(True)
-                prediction = self.beauty(tensor)
-                (prediction * self.rank).sum().backward()
-                cam = (gradients[0].mean((2,3), keepdim=True) * activation[0]).sum(1)[0].relu()
-                cam = cam.detach().cpu().numpy()
-                cam = (cam-cam.min()) / max(float(cam.max()-cam.min()), 1e-20)
-                # Undo Resize(256) + CenterCrop(224), then map back to the exact crop.
-                h,w = image.shape[:2]
-                rw,rh = (int(w*256/min(w,h)), int(h*256/min(w,h)))
-                plane = np.zeros((rh,rw),np.float32)
-                left,top = (rw-224)//2,(rh-224)//2
-                plane[top:top+224,left:left+224] = cv2.resize(cam,(224,224))
-                return cv2.resize(plane,(w,h))
-        finally:
-            for handle in handles:
-                handle.remove()
-            activation.clear()
-            gradients.clear()
-            self.beauty.zero_grad(set_to_none=True)

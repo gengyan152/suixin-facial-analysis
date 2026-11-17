@@ -1,4 +1,4 @@
-"""CPU migration parity and input/geometry contracts; no real dataset required."""
+"""CPU migration parity and input contracts; no real dataset required."""
 import importlib.util
 import argparse
 import json
@@ -11,23 +11,6 @@ import torch
 from torch import nn
 from datasets import APPADataset, appa_augmentation, fine_target
 from models import TwoDFAP, age_model, score_outputs, fap_loss
-from geometry import LANDMARKS, measure_geometry
-
-
-def fixture_landmarks():
-    points = np.full((478, 2), [150., 180.])
-    oval = LANDMARKS['face_oval']
-    angle = np.linspace(-np.pi/2, 3*np.pi/2, len(oval), endpoint=False)
-    points[oval] = np.stack([150+100*np.cos(angle), 180+140*np.sin(angle)], 1)
-    overrides = {33: [80, 140], 133: [125, 140], 362: [175, 140], 263: [220, 140],
-                 159: [102, 133], 145: [102, 147], 386: [198, 133], 374: [198, 147],
-                 52: [100, 115], 65: [110, 115], 282: [200, 115], 295: [190, 115],
-                 9: [150, 110], 2: [150, 200], 152: [150, 320], 168: [150, 120], 6: [150, 160],
-                 98: [128, 190], 327: [172, 190], 0: [150, 226], 13: [150, 234],
-                 14: [150, 237], 17: [150, 249], 61: [118, 237], 291: [182, 237]}
-    for index, value in overrides.items():
-        points[index] = value
-    return points
 
 
 def main():
@@ -96,16 +79,7 @@ def main():
     for _ in range(30):
         augmented = augmentation.augment_image(np.full((224, 224, 3), [17, 99, 233], dtype=np.uint8))
         assert augmented.shape == (224, 224, 3)
-    points = fixture_landmarks()
-    original = measure_geometry(points/[300, 400], 300, 400)
-    angle = .21
-    c, s = np.cos(angle), np.sin(angle)
-    rotated = (points-[150, 180]) @ np.array([[c, s], [-s, c]]) + [150, 180]
-    transformed = measure_geometry(rotated/[300, 400], 300, 400)
-    error = max(abs(original[k]-transformed[k]) for k in original)
-    assert error < 1e-12, error
-    result['input_and_geometry'] = {'bgr_0_255_exact': True, 'rounded_label': label,
-        'augmentation_draws': 30, 'roll_invariance_max_abs_error': error, 'non_square_image': [300, 400]}
+    result['input_contracts'] = {'bgr_0_255_exact': True, 'rounded_label': label, 'augmentation_draws': 30}
     write_json(ROOT/f'artifacts/contracts_verification{"_cuda" if args.device == "cuda" else ""}.json', result)
     print(json.dumps(result, indent=2), flush=True)
 

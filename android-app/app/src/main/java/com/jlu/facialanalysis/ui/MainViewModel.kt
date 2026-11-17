@@ -5,9 +5,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.jlu.facialanalysis.data.model.GenderViewKey
 import com.jlu.facialanalysis.data.model.HealthStatus
-import com.jlu.facialanalysis.data.model.OverlayLayer
 import com.jlu.facialanalysis.data.model.TaskResult
 import com.jlu.facialanalysis.data.network.BackendApiClient
 import com.jlu.facialanalysis.data.offline.OfflineDemoRepository
@@ -42,9 +40,6 @@ data class UiState(
     val queuePosition: Int = 0,
     val taskResult: TaskResult? = null,
     val networkError: String? = null,
-    val selectedGenderView: GenderViewKey = GenderViewKey.GENERAL,
-    val selectedOverlayLayer: OverlayLayer = OverlayLayer.ORIGINAL,
-    val highlightedRegionKey: String? = null,
     val clientTimingsMs: Map<String, Long> = emptyMap(),
     val localPreviewBytes: ByteArray? = null
 )
@@ -88,8 +83,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 activeTaskId = null,
                 taskResult = null,
                 networkError = null,
-                selectedOverlayLayer = OverlayLayer.ORIGINAL,
-                highlightedRegionKey = null,
                 clientTimingsMs = emptyMap(),
                 localPreviewBytes = null
             )
@@ -182,9 +175,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     isSubmitting = true,
                     taskResult = null,
                     networkError = null,
-                    selectedOverlayLayer = OverlayLayer.ORIGINAL,
-                    selectedGenderView = GenderViewKey.GENERAL,
-                    highlightedRegionKey = null,
                     clientTimingsMs = linkedMapOf("image_prep_ms" to prepMs),
                     localPreviewBytes = imageBytes
                 )
@@ -270,9 +260,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     activeTaskId = demoResult.taskId,
                     taskResult = demoResult,
                     networkError = null,
-                    selectedOverlayLayer = OverlayLayer.ORIGINAL,
-                    selectedGenderView = GenderViewKey.GENERAL,
-                    highlightedRegionKey = null,
                     clientTimingsMs = emptyMap(),
                     localPreviewBytes = null
                 )
@@ -284,21 +271,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     networkError = "加载离线缓存样例失败：${err.message}"
                 )
             }
-        }
-    }
-
-    fun selectGenderView(viewKey: GenderViewKey) {
-        _uiState.update { it.copy(selectedGenderView = viewKey) }
-    }
-
-    fun selectOverlayLayer(layer: OverlayLayer) {
-        _uiState.update { it.copy(selectedOverlayLayer = layer) }
-    }
-
-    fun toggleHighlightRegion(regionKey: String?) {
-        _uiState.update { state ->
-            val next = if (state.highlightedRegionKey == regionKey) null else regionKey
-            state.copy(highlightedRegionKey = next)
         }
     }
 
@@ -318,9 +290,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         val nextTimings = LinkedHashMap(state.clientTimingsMs)
                         if (taskResult.scores != null && !nextTimings.containsKey("scores_e2e_ms")) {
                             nextTimings["scores_e2e_ms"] = nowMs
-                        }
-                        if (taskResult.explanation != null && !nextTimings.containsKey("explanation_e2e_ms")) {
-                            nextTimings["explanation_e2e_ms"] = nowMs
                         }
                         if (taskResult.isTerminal) {
                             nextTimings["total_e2e_ms"] = nowMs
