@@ -10,9 +10,9 @@
 
 ## 系统架构
 
-![系统架构图](docs/assets/architecture.png)
+![系统架构图](docs/assets/system_architecture.png)
 
-> 架构可编辑矢量源文件见 [`docs/assets/architecture.svg`](docs/assets/architecture.svg)。v1.1 版本已精简并移除旧版 478 点像素平面几何测量、分性别统计及 Grad-CAM / 局部模糊敏感性模块，聚焦端云协同的主链路分析体验。
+> 架构可编辑矢量源文件见 [`docs/assets/system_architecture.svg`](docs/assets/system_architecture.svg)。v1.1 版本已精简并移除旧版 478 点像素平面几何测量、分性别统计及 Grad-CAM / 局部模糊敏感性模块，聚焦端云协同的主链路分析体验。
 
 ---
 
@@ -140,7 +140,7 @@ python backend\scripts\prepare_age.py
 │   ├── vendor/               # 上游模型参考源码快照（2D-FAP / age-estimation-pytorch）
 │   └── README.md             # 数据集准备、训练命令与实验指标记录
 ├── docs/                     # 技术文档与架构图
-│   ├── assets/architecture.* # v1.1 系统总体架构图（SVG 源文件 + PNG）
+│   ├── assets/system_architecture.* # 系统总体架构图（SVG 源文件 + PNG）
 │   ├── API_CONTRACT.md       # 前后端接口与数据结构契约 v1.1
 │   └── TRAINING_ASSESSMENT.md# RTX 4060 实测吞吐量与五折正式训练报告
 └── AGENTS.md                 # 仓库协作开发精简指引
