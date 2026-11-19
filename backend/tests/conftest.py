@@ -6,7 +6,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    parser.addoption("--live",action="store_true",help="Run resident CUDA/FaceLLM integration checks too")
+    parser.addoption("--live",action="store_true",help="Run resident CUDA/InternVL integration checks too")
 
 
 def pytest_collection_modifyitems(config,items):

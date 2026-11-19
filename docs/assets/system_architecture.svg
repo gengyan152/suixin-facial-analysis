@@ -118,7 +118,7 @@
   <line x1="779" y1="242" x2="779" y2="268" class="arrow" marker-end="url(#head-slate)"/>
 
   <rect x="678" y="270" width="202" height="84" rx="8" fill="#EEF4FB" stroke="#8FA8C8" stroke-width="1.2"/>
-  <text x="779" y="303" text-anchor="middle" class="font box-title">FaceLLM-1B (BF16)</text>
+  <text x="779" y="303" text-anchor="middle" class="font box-title">InternVL3-2B Gate</text>
   <text x="779" y="326" text-anchor="middle" class="font box-sub">HUMAN / NON_HUMAN</text>
 
   <!-- Arrow Col 2 -> Col 3 (1 human) -->
@@ -168,7 +168,7 @@
   <text x="1325" y="265" text-anchor="middle" class="font badge" fill="#2A5434">scores_ready</text>
 
   <rect x="1212" y="284" width="226" height="72" rx="8" fill="#F6F3FA" stroke="#A799C7" stroke-width="1.2"/>
-  <text x="1325" y="314" text-anchor="middle" class="font box-title">FaceLLM-1B Narrative</text>
+  <text x="1325" y="314" text-anchor="middle" class="font box-title">InternVL3-2B + LoRA</text>
   <text x="1325" y="336" text-anchor="middle" class="font box-sub">6-Field Description + Fallback</text>
 
   <!-- ==================== ROW 2: BRANCH OUTCOMES ==================== -->

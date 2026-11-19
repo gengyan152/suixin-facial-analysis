@@ -6,12 +6,12 @@
 ## 常用启动与测试命令
 - 启动后端（USB 回环 `127.0.0.1:8000`）：`.\run_usb_mode.ps1`
 - 启动后端（热点/局域网 `0.0.0.0:8000`）：`.\run_hotspot_mode.ps1`
-- 后端单元测试：`cd backend && pytest -q`（加 `--live` 跑真实 CUDA/FaceLLM 集成测试）
+- 后端单元测试：`cd backend && pytest -q`（加 `--live` 跑真实 CUDA/InternVL 集成测试）
 - Android 单测 / 构建：`.\android-app\build_apk.ps1`（自动通过 NTFS junction 规避 Windows 非 ASCII 路径问题）
 
 ## 技术栈
 - `android-app/`：Kotlin、Jetpack Compose、Material 3、CameraX、端侧 MediaPipe BlazeFace、OkHttp、Coil。
-- `backend/`：Python、FastAPI、Uvicorn（固定 `--workers 1` 单 GPU 线程）、PyTorch、Transformers（`Idiap/FaceLLM-1B`）、MediaPipe、OpenCV YuNet。
+- `backend/`：Python、FastAPI、Uvicorn（固定 `--workers 1` 单 GPU 线程）、PyTorch、Transformers（`OpenGVLab/InternVL3-2B-hf + LoRA`）、MediaPipe、OpenCV YuNet。
 - `training/`：PyTorch 复现训练（`2D-FAP` MobileNetV2、`APPA-REAL` SE-ResNeXt-50）。
 
 ## 目录与契约约定
@@ -21,4 +21,4 @@
 - `2D-FAP` / `APPA-REAL` 权重交接仅使用纯 `state_dict`（`weights_only=True, strict=True`）；年龄模型输入保持 BGR `0-255 float32`。
 
 ## 当前状态
-- 前后端支持人脸门禁、姿态与画质校验、颜值与表观年龄评估及 FaceLLM 六字段中文面容描述主链路，配套 GitHub 发布流程与离线 Plan B 演示。
+- 前后端支持人脸门禁、姿态与画质校验、颜值与表观年龄评估及 InternVL3 六字段中文面容描述主链路，配套 GitHub 发布流程与离线 Plan B 演示。

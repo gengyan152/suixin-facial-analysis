@@ -12,7 +12,7 @@ from app.config import Settings, GateRejected
 from app.main import create_app
 from app.pipeline import Pipeline
 from app.schemas import Health, TaskResult
-from app.facellm import FIELD_LABELS
+from app.vlm import FIELD_LABELS
 
 
 def photo(color=100):
@@ -141,6 +141,7 @@ def test_gate_failure_and_post_text_failure_are_separate():
         result = wait(client, submit(client)["task_id"])
         assert result["status"] == "partial_error" and result["scores"] and result["original_image_url"]
         assert set(result["text_analysis"]["fields"]) == set(FIELD_LABELS)
+        assert result["text_analysis"]["narrative"] == "画面中的人物表观年龄约 30 岁，颜值评分为 3.0 分（满分 5.0 分）。"
 
 
 def test_size_decode_and_content_type():
@@ -182,11 +183,3 @@ def test_bounded_queue_idempotency_and_single_worker():
         blocker.set()
         wait(client, first["task_id"])
         assert len(set(pipeline.thread_ids)) == 1
-
-
-def test_mouth_occlusion_and_negation_never_fabricate_visible():
-    from app.facellm import controlled_attribute
-    assert controlled_attribute("mouth", "The mouth is occluded; cannot tell whether the lips are open or closed.") == "UNKNOWN"
-    assert controlled_attribute("mouth", "No teeth can be seen; the lips are not open.") == "UNKNOWN"
-    assert controlled_attribute("mouth", "Her lips are closed and no teeth are visible.") == "CLOSED"
-    assert controlled_attribute("mouth", "Mouth is open and teeth are visible.") == "TEETH_VISIBLE"

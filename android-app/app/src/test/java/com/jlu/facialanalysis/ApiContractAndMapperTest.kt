@@ -109,7 +109,7 @@ class ApiContractAndMapperTest {
               },
               "text_analysis": {
                 "status": "degraded",
-                "error_message": "FaceLLM description timed out",
+                "error_message": "InternVL description timed out",
                 "fields": {}
               }
             }

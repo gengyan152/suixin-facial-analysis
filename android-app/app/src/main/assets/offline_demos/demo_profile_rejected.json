@@ -1,10 +1,11 @@
 {
   "task_id": "offline_demo_quality_04",
-  "image_id": "img_7cdd5424573840b3",
+  "image_id": "img_9547354876f94603",
   "status": "rejected",
   "is_offline_replay": true,
   "model_versions": null,
   "generated_at": null,
+  "original_image_url": null,
   "rejection": {
     "code": "IMAGE_TOO_BLURRY",
     "message": "画面清晰度不足，请保持稳定后重拍",
@@ -17,8 +18,7 @@
   "text_analysis": null,
   "ethics_notice": "说明：颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计偏好，不代表客观美丑标准或个体价值；表观年龄为模型估计。本系统不做疾病诊断、性格命运推断或性取向预测。图像仅在本地演示设备内存处理并定时销毁，不上传公网云端。",
   "timings_ms": {
-    "total_elapsed_ms": 181.2727999931667,
-    "gate_ms": 170.5305999785196
-  },
-  "original_image_url": null
+    "total_elapsed_ms": 408.2079000072554,
+    "gate_ms": 382.91489996481687
+  }
 }

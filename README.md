@@ -4,7 +4,7 @@
 
 本项目是吉林大学 Android 软件开发课程期末大作业。
 
-整体由 **Android 客户端（Kotlin / Jetpack Compose / CameraX / MediaPipe）**、**本地 FastAPI GPU 推理后端（FaceLLM-1B + 2D-FAP + APPA-REAL + 姿态/画质门禁）** 与 **可复现训练工程** 组成。所有上传图像仅在本地设备内存中处理并在 `120` 秒后自动销毁，不上传任何公网云端服务器。
+整体由 **Android 客户端（Kotlin / Jetpack Compose / CameraX / MediaPipe）**、**本地 FastAPI GPU 推理后端（InternVL3-2B + LoRA + 2D-FAP + APPA-REAL + 姿态/画质门禁）** 与 **可复现训练工程** 组成。所有上传图像仅在本地设备内存中处理并在 `120` 秒后自动销毁，不上传任何公网云端服务器。
 
 ---
 
@@ -22,13 +22,13 @@
   - 手机端使用端侧离线 `MediaPipe BlazeFace` 进行低延迟人脸框与关键点预览；
   - 推理请求限制原始二进制流（`<= 8 MB`），后端纯内存解码并设置 `120s` TTL 自动清理（支持客户端主动 `DELETE` 立即销毁），客户端拦截公网 URL 与 HTTP 重定向。
 - **双检测器 + VLM 候选级门禁 + 画质校验**
-  - 结合 `MediaPipe` 与 `OpenCV YuNet` 双检测器做候选关联，再由常驻 `Idiap/FaceLLM-1B` 对每个候选框逐一判别 `HUMAN / NON_HUMAN / UNKNOWN`；
+  - 结合 `MediaPipe` 与 `OpenCV YuNet` 双检测器做候选关联，再由常驻的 InternVL3-2B 基座 对每个候选框逐一判别 `HUMAN / NON_HUMAN / UNKNOWN`；
   - 狗、猫、动漫、玩偶等非人脸统一拦截为 `NO_HUMAN_FACE`（“未识别到人脸”）且绝不出分；人宠同框自动过滤非人脸；多人同框支持交互式点选目标人脸（`need_selection`）；
   - 通过 `FaceLandmarker` 3D 姿态矩阵与灰度亮度 / Laplacian 清晰度检验，对偏转过大、过暗过曝或失焦照片给出具体重拍引导。
 - **颜值评分、表观年龄与自然语言面容描述**
   - **颜值评分（`2D-FAP` / MobileNetV2）**：1–5 分制期望分及五档概率分布；在 `SCUT-FBP5500` 官方五折交叉验证上取得均值 `PC = 0.9135 ± 0.0029`、`MAE = 0.2152 ± 0.0037`；
   - **表观年龄（`APPA-REAL` / SE-ResNeXt-50）**：基于官方预训练 101 类期望年龄估计；
-  - **中文可见外观描述（`FaceLLM-1B`）**：提取眉、眼、鼻、嘴、脸部轮廓与可见表情六字段观察并合成一段式自然语言面容描述（超时自动走受控回退，保留数值结果）。
+  - **中文可见外观描述（InternVL3-2B + LoRA）**：将眉、眼、鼻、嘴、脸部轮廓与可见表情的观察合成一段文字。文字生成失败时保留数值结果。
 - **零网络离线演示（Plan B）**
   - App 内置 4 组由真实后端推理导出的离线缓存样例（含正常正脸全量分析与非人脸/失焦拦截样例），无后端时也可一键体验完整界面流程。
 
@@ -67,7 +67,7 @@ Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
 
 ### 1. 硬件与系统要求
 
-- **后端推理主机**：Windows 10/11，推荐配备支持 CUDA 的 NVIDIA GPU（实测 `RTX 4060 Laptop 8 GB VRAM` 可流畅常驻全部模型，峰值显存约 `2.3 GiB`），Python `3.10`–`3.13`。
+- **后端推理主机**：Windows 10/11，推荐配备支持 CUDA 的 NVIDIA GPU（实测 `RTX 4060 Laptop 8 GB VRAM` 可在单卡运行完整推理），Python `3.10`–`3.13`。
 - **Android 手机**：Android 8.0（API 26）及以上真机（支持 CameraX 与本地照片选择）。
 
 ### 2. 安装后端依赖与模型权重
@@ -80,22 +80,22 @@ python -m venv backend\.venv
 # 2) 安装 Python 依赖
 pip install -r backend\requirements.txt
 
-# 3) 下载公开模型权重与预热样本（MediaPipe、YuNet、Idiap/FaceLLM-1B、APPA-REAL）
+# 3) 下载公开模型权重与预热样本（MediaPipe、YuNet、InternVL3-2B、LoRA、APPA-REAL）
 # 若所处网络环境需要代理，请先设置 $env:HTTPS_PROXY / $env:HTTP_PROXY
 python backend\scripts\download_weights.py
 python backend\scripts\prepare_age.py
 ```
 
 **关于 2D-FAP 颜值权重：**
-- 上述公开下载脚本会自动备齐 `FaceLLM-1B`、MediaPipe、YuNet 与 `APPA-REAL` 官方年龄权重；
-- **推荐直接从本仓库 [Releases (v1.1)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.1) 下载已训练好的 `2dfap_fold1_state_dict.pt`**，放入 `backend/weights/` 即可开箱获得正式颜值评分；
+- 上述公开下载脚本会下载 InternVL3-2B 基座、Release 中的 LoRA 和 MediaPipe、YuNet、APPA-REAL 权重；
+- **推荐直接从本仓库 [Releases (v1.2)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.2) 下载已训练好的 `2dfap_fold1_state_dict.pt`**，放入 `backend/weights/` 即可开箱获得正式颜值评分；
 - 若未放置该权重文件，后端仍可正常启动，并在健康检查和界面中诚实标示 `weights_status = "untrained_init"`（`weights_ready = false`）；
 - 如需从头复现训练，请参考 [training/README.md](training/README.md) 完成 `SCUT-FBP5500` 五折训练后导出至 `backend/weights/`。
 
 ### 3. 安装或构建 Android 客户端
 
 - **方式一：直接安装 Release APK（推荐）**
-  - 从本仓库 [Releases (v1.1)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.1) 下载 `suixin-1.1.apk`，通过 `adb install -r suixin-1.1.apk` 或直接在手机上安装。
+  - 从本仓库 [Releases (v1.2)](https://github.com/gengyan152/suixin-facial-analysis/releases/tag/v1.2) 下载 `suixin-1.2.apk`，通过 `adb install -r suixin-1.2.apk` 或直接在手机上安装。
 - **方式二：从源码构建**
   - 使用 Android Studio 打开 `android-app/` 目录编译运行，或在仓库根目录执行：
     ```powershell
@@ -131,7 +131,7 @@ python backend\scripts\prepare_age.py
 │   ├── build_apk.ps1         # 兼容中文路径的 Gradle 构建/测试脚本
 │   └── README.md             # 客户端界面设计与构建说明
 ├── backend/                  # FastAPI 单 GPU 推理后端
-│   ├── app/                  # 核心服务（门禁、质量校验、数值推理、FaceLLM）
+│   ├── app/                  # 核心服务（门禁、质量校验、数值推理、InternVL3-2B）
 │   ├── scripts/              # 权重下载、年龄权重解包、启动辅助与冒烟脚本
 │   ├── tests/                # 契约单测与真实 CUDA 集成测试
 │   ├── requirements.txt      # 后端运行依赖

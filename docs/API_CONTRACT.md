@@ -40,9 +40,14 @@
       "loaded": true,
       "version": "mediapipe_face_landmarker_pose"
     },
-    "facellm": {
+    "face_gate": {
       "loaded": true,
-      "version": "Idiap/FaceLLM-1B",
+      "version": "OpenGVLab/InternVL3-2B-hf",
+      "precision": "bf16"
+    },
+    "description": {
+      "loaded": true,
+      "version": "OpenGVLab/InternVL3-2B-hf + LoRA",
       "precision": "bf16"
     },
     "beauty_2dfap": {
@@ -122,7 +127,7 @@
 `"queued"` | `"processing"` | `"rejected"` | `"need_selection"` | `"scores_ready"` | `"completed"` | `"partial_error"`
 
 #### （A）门禁拦截态（`status == "rejected"`）
-- 当经候选框关联与逐候选 `FaceLLM-1B` 前置枚举判别（`HUMAN / NON_HUMAN / UNKNOWN`）后，**保留的有效 `HUMAN` 候选数为 0**（包括狗脸、猫脸、猴子脸、毛绒玩偶、卡通动漫头像、日常风景物体、或漏检图像）时：
+- 当经候选框关联与逐候选 `InternVL3-2B` 前置枚举判别（`HUMAN / NON_HUMAN / UNKNOWN`）后，**保留的有效 `HUMAN` 候选数为 0**（包括狗脸、猫脸、猴子脸、毛绒玩偶、卡通动漫头像、日常风景物体、或漏检图像）时：
   - `rejection.code` 必须为 `"NO_HUMAN_FACE"`
   - `rejection.message` 必须为 **`"未识别到人脸"`**
   - `scores`、`text_analysis` 必须全部为 `null`，绝不出分。
@@ -207,7 +212,7 @@
   "model_versions": {
     "beauty": "2d_fap_mobilenetv2 (trained_fold1)",
     "age": "se_resnext50_appa_real (appa_real_pretrained)",
-    "text": "Idiap/FaceLLM-1B"
+    "text": "OpenGVLab/InternVL3-2B-hf + LoRA"
   },
   "generated_at": "2026-11-17T11:40:03+08:00",
   "original_image_url": "/api/v1/tasks/tsk_ok_001/artifacts/normalized.jpg",

@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 from unittest.mock import Mock
 
@@ -9,7 +10,7 @@ import torch
 
 from app.config import Settings, GateRejected
 from app.imaging import decode_image, match_candidates
-from app.facellm import parse_gate, parse_fields, controlled_attribute
+from app.vlm import compose_narrative, FIELD_LABELS, parse_gate, parse_fields
 from app.numeric import BeautyModel, age_tensor
 from app.pipeline import Pipeline
 from app.quality import check_quality
@@ -102,20 +103,37 @@ def test_unknown_and_exceptions_never_score():
     assert error.value.code == "GATE_UNAVAILABLE"
 
 
-def test_text_parser_six_fields_strict_bool():
-    import json
-    fields = {key: {"label": key, "description": "轮廓清晰", "visible": True} for key in ("brows", "eyes", "nose", "mouth", "contour", "expression")}
-    assert len(parse_fields("```json\n" + json.dumps(fields) + "\n```")) == 6
-    fields["eyes"]["visible"] = "false"
-    with pytest.raises(ValueError):
-        parse_fields(json.dumps(fields))
+def test_text_parser_assembles_short_observations_and_unknown_fields():
+    raw = json.dumps({
+        "眉部": "帽檐遮住眉毛，眉形无法看清。",
+        "眼睛": " 眼裂稍长，两端略收窄。 ",
+        "nose": "鼻梁挺直，显得很有气质",
+        "mouth": False,
+        "contour": "无。",
+        "expression": "neutral",
+    })
+    fields = parse_fields("```json\n" + raw + "\n```")
+    assert set(fields) == set(FIELD_LABELS)
+    assert fields["eyes"] == {"label": "眼部", "description": "眼裂稍长，两端略收窄。", "visible": True}
+    for key in fields.keys() - {"eyes"}:
+        assert fields[key] == {"label": FIELD_LABELS[key], "description": "无法判断", "visible": False}
 
 
-def test_controlled_description_drops_personality_and_handles_negation():
-    assert controlled_attribute("mouth", "The lips are closed, and the teeth are not visible.") == "CLOSED"
-    assert controlled_attribute("mouth", "The lips are parted, revealing the upper teeth.") == "TEETH_VISIBLE"
-    assert controlled_attribute("brows", "The eyebrows are arched.") == "ARCHED"
-    assert controlled_attribute("eyes", "He is wise and kind.") == "UNKNOWN"
+def test_text_parser_distinguishes_abstention_from_invalid_output():
+    fields = parse_fields(json.dumps(dict.fromkeys(FIELD_LABELS)))
+    assert all(not field["visible"] for field in fields.values())
+    for raw in ('{"nose": "straight"}', '{"contour": {"description": "椭圆"}}', '{"eyes":', '{}'):
+        with pytest.raises(ValueError):
+            parse_fields(raw)
+
+
+def test_narrative_uses_scores_and_visible_observations():
+    fields = parse_fields('{"brows": null, "eyes": "眼裂偏长。", "nose": "鼻尖较圆！"}')
+    for beauty in (2.3, 4.2):
+        scores = {"beauty_display": beauty, "apparent_age_display": 30}
+        assert compose_narrative(scores, fields) == (
+            f"画面中的人物表观年龄约 30 岁，颜值评分为 {beauty:.1f} 分（满分 5.0 分）。眼裂偏长。鼻尖较圆。"
+        )
 
 
 @pytest.mark.parametrize("case,expected", [

@@ -7,7 +7,7 @@ from .config import GateRejected
 from .imaging import crop, match_candidates, iou
 from .quality import check_quality
 from .numeric import NumericalModels
-from .facellm import FaceLLM
+from .vlm import INTERNVL_VERSION, InternVL
 
 
 class Pipeline:
@@ -16,7 +16,8 @@ class Pipeline:
         self.models = {
             "gate_detectors": {"loaded": False, "version": "mediapipe_face_detector + opencv_yunet"},
             "landmarks": {"loaded": False, "version": "mediapipe_face_landmarker_pose"},
-            "facellm": {"loaded": False, "version": "Idiap/FaceLLM-1B", "precision": "bf16"},
+            "face_gate": {"loaded": False, "version": INTERNVL_VERSION},
+            "description": {"loaded": False, "version": f"{INTERNVL_VERSION} + LoRA"},
             "beauty_2dfap": {"loaded": False, "version": "2d_fap_mobilenetv2", "weights_status": "untrained_init", "weights_ready": False},
             "apparent_age": {"loaded": False, "version": "se_resnext50_appa_real", "weights_status": "missing"},
         }
@@ -28,7 +29,7 @@ class Pipeline:
         import mediapipe as mp
         torch.set_num_threads(4)
         if not torch.cuda.is_available():
-            raise RuntimeError("CUDA is required for the resident FaceLLM deployment")
+            raise RuntimeError("CUDA is required for the resident InternVL deployment")
         self.mp = mp
         # model_asset_buffer avoids Windows non-ASCII path problems in native APIs.
         base = mp.tasks.BaseOptions
@@ -46,8 +47,13 @@ class Pipeline:
         self.numeric = NumericalModels(self.settings.weights, self.device)
         self.models["beauty_2dfap"].update(loaded=True, weights_status=self.numeric.beauty_status, weights_ready=self.numeric.beauty_status != "untrained_init")
         self.models["apparent_age"].update(loaded=True, weights_status=self.numeric.age_status)
-        self.llm = FaceLLM(self.settings, self.device)
-        self.models["facellm"].update(loaded=True, precision=self.llm.precision)
+        self.llm = InternVL(
+            self.settings, self.device,
+            self.settings.weights / "InternVL3-2B-hf",
+            self.settings.weights / "InternVL3-2B-face-lora",
+        )
+        for stage in ("face_gate", "description"):
+            self.models[stage].update(loaded=True, precision=self.llm.precision)
 
     def detect(self, image):
         h, w = image.shape[:2]

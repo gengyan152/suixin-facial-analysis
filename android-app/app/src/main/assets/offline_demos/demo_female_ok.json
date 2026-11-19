@@ -1,14 +1,15 @@
 {
   "task_id": "offline_demo_female_01",
-  "image_id": "img_ae3b7c692ed64d81",
+  "image_id": "img_01c1e3d3518d4cfd",
   "status": "completed",
   "is_offline_replay": true,
   "model_versions": {
     "beauty": "2d_fap_mobilenetv2 (trained_fold1)",
     "age": "se_resnext50_appa_real (appa_real_pretrained)",
-    "text": "Idiap/FaceLLM-1B"
+    "text": "OpenGVLab/InternVL3-2B-hf + LoRA"
   },
-  "generated_at": "2026-11-14T18:40:15.749930+08:00",
+  "generated_at": "2026-11-19T15:44:50.247011+08:00",
+  "original_image_url": "file:///android_asset/offline_demos/female_orig.jpg",
   "rejection": null,
   "selection": null,
   "target_face": {
@@ -18,39 +19,39 @@
     "bbox_px": [
       177,
       62,
-      272,
-      177
+      273,
+      178
     ],
     "bbox_norm": [
       0.345703125,
       0.12109375,
-      0.53125,
-      0.345703125
+      0.533203125,
+      0.34765625
     ],
     "pose_deg": {
-      "yaw": -0.7093775574871942,
-      "pitch": 6.6052909563024516,
-      "roll": -2.851380129790619
+      "yaw": -1.1291880434943633,
+      "pitch": 6.704318382867883,
+      "roll": -3.1592204715569063
     },
-    "blur_laplacian_var": 869.3473932711593,
-    "brightness_mean": 155.20247139588102
+    "blur_laplacian_var": 894.623109184242,
+    "brightness_mean": 154.48626077586206
   },
   "scores": {
-    "beauty_score": 2.2982871532440186,
-    "beauty_display": 2.3,
+    "beauty_score": 2.1280786991119385,
+    "beauty_display": 2.1,
     "scale_min": 1,
     "scale_max": 5,
     "distribution_label": "模型预测评分分布（1—5 档）",
     "rating_probabilities": [
-      0.2656673192977905,
-      0.29922303557395935,
-      0.3130094110965729,
-      0.07688722014427185,
-      0.0452130101621151
+      0.2885427474975586,
+      0.331718385219574,
+      0.32753318548202515,
+      0.03213605284690857,
+      0.020069647580385208
     ],
-    "distribution_std": 1.086157628101793,
-    "apparent_age": 28.631832122802734,
-    "apparent_age_display": 29,
+    "distribution_std": 0.9479050829150875,
+    "apparent_age": 31.016212463378906,
+    "apparent_age_display": 31,
     "weights_ready": true,
     "weights_status": "trained_fold1"
   },
@@ -60,43 +61,42 @@
     "fields": {
       "brows": {
         "label": "眉部",
-        "description": "眉形呈弧形。",
+        "description": "两侧眉线略带弧度。",
         "visible": true
       },
       "eyes": {
         "label": "眼部",
-        "description": "眼睛睁开，眼裂轮廓可见。",
+        "description": "两眼的眼裂中间较宽，两端收窄。",
         "visible": true
       },
       "nose": {
         "label": "鼻部",
-        "description": "可见鼻部轮廓较圆润。",
+        "description": "鼻翼宽度与两内眼角之间的距离接近。",
         "visible": true
       },
       "mouth": {
         "label": "嘴部",
-        "description": "嘴部张开，可见牙齿。",
+        "description": "上下唇的唇红偏薄。",
         "visible": true
       },
       "contour": {
         "label": "脸部轮廓",
-        "description": "可见面部轮廓偏椭圆。",
+        "description": "脸颊较宽，轮廓向下颌收窄。",
         "visible": true
       },
       "expression": {
         "label": "可见表情",
-        "description": "可见嘴角上扬，呈微笑表情。",
+        "description": "两侧嘴角上扬。",
         "visible": true
       }
     },
-    "narrative": "画面中的人物表观年龄约 29 岁，颜值评分为 2.3 分（满分 5.0 分），面容神态真实松弛，整体风格质朴自然。细看五官细节，脸部轮廓柔和偏椭圆，眉形柔和呈自然弧度，双眸自然舒展、眼型清晰，鼻头线条柔和圆润，唇齿微露，唇角轻扬带着浅浅笑意，整体面容舒展和谐。"
+    "narrative": "画面中的人物表观年龄约 31 岁，颜值评分为 2.1 分（满分 5.0 分）。脸颊较宽，轮廓向下颌收窄。两侧眉线略带弧度。两眼的眼裂中间较宽，两端收窄。鼻翼宽度与两内眼角之间的距离接近。上下唇的唇红偏薄。两侧嘴角上扬。"
   },
   "ethics_notice": "说明：颜值评分与参考维度仅反映特定公开数据集标注群体的主观统计偏好，不代表客观美丑标准或个体价值；表观年龄为模型估计。本系统不做疾病诊断、性格命运推断或性取向预测。图像仅在本地演示设备内存处理并定时销毁，不上传公网云端。",
   "timings_ms": {
-    "total_elapsed_ms": 7376.476200006437,
-    "gate_ms": 168.1780999933835,
-    "scores_ms": 26.171400008024648,
-    "text_ms": 7071.081499976572
-  },
-  "original_image_url": "file:///android_asset/offline_demos/female_orig.jpg"
+    "total_elapsed_ms": 9423.830799991265,
+    "gate_ms": 390.14719997067004,
+    "scores_ms": 53.0488999793306,
+    "text_ms": 8978.009399957955
+  }
 }

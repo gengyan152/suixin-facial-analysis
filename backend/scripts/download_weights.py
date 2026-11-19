@@ -2,7 +2,6 @@
 import concurrent.futures
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import sys
@@ -12,16 +11,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import WEIGHTS
 import requests
 
-REVISION = "f253c5c2f3b6622998ba5b1ba2fb13dd33dc7474"
+MODEL_REVISION = "cb57a075cb75a2e6d1b668b128d48bb00ae321d2"
+MODEL_URL = f"https://huggingface.co/OpenGVLab/InternVL3-2B-hf/resolve/{MODEL_REVISION}"
+RELEASE_URL = "https://github.com/gengyan152/suixin-facial-analysis/releases/download/v1.2"
+MODEL_FILES = (
+    "added_tokens.json", "chat_template.jinja", "config.json", "generation_config.json",
+    "merges.txt", "model.safetensors", "preprocessor_config.json", "processor_config.json",
+    "special_tokens_map.json", "tokenizer_config.json", "tokenizer.json", "vocab.json",
+)
 EXPECTED_SHA256 = {
     "blaze_face_short_range.tflite":"b4578f35940bf5a1a655214a1cce5cab13eba73c1297cd78e1a04c2380b0152f",
     "face_landmarker.task":"64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
     "face_detection_yunet_2023mar.onnx":"8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
-    "FaceLLM-1B/model/model-00001-of-00002.safetensors":"fadee7acba57f151b9e4e2fdef2c7532507e3041db7800ec4ce7602a366ae990",
-    "FaceLLM-1B/model/model-00002-of-00002.safetensors":"09a8c1fcdc08d64b2217d828518632fbf811d4d1168faf4c9a062a03bb5af5ff",
+    "InternVL3-2B-hf/model.safetensors": "8e2c302719a13916a4d276e60fad4fb1c92a57b39dd2ad51af5a63dcf7a16f4a",
+    "InternVL3-2B-face-lora/adapter_config.json": "eb16f4b8cc107d22fa0893d2f86a3f8026462126b7b7cdabca60b05dae159c0a",
+    "InternVL3-2B-face-lora/adapter_model.safetensors": "714144a59af9b8ecca4841bce6bc19efdd7101a5a90589df85dc4c27ce659a1e",
     "age_release/epoch044_0.02343_3.9984.pth":"ae49c7f7d65ada34ac60adb610997e7cf267bf3072d9ee6549105f754c580807",
 }
 ASSETS = {
+    **{f"InternVL3-2B-hf/{name}": f"{MODEL_URL}/{name}" for name in MODEL_FILES},
+    "InternVL3-2B-face-lora/adapter_config.json": f"{RELEASE_URL}/adapter_config.json",
+    "InternVL3-2B-face-lora/adapter_model.safetensors": f"{RELEASE_URL}/adapter_model.safetensors",
     "blaze_face_short_range.tflite": "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
     "face_landmarker.task": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
     "face_detection_yunet_2023mar.onnx": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
@@ -39,9 +49,9 @@ def download(item):
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         part = path.with_suffix(path.suffix + ".part")
-        if name.endswith(".safetensors"):
+        if name == "InternVL3-2B-hf/model.safetensors":
             # Some local proxies buffer whole large objects; bounded HTTP ranges
-            # also make retries resume rather than restart a 1 GB shard.
+            # also make retries resume rather than restart the full checkpoint.
             offset = part.stat().st_size if part.exists() else 0
             total = offset+1
             while offset < total:
@@ -68,23 +78,20 @@ def download(item):
                 with part.open("wb") as output:
                     for chunk in response.iter_content(1024 * 1024):
                         output.write(chunk)
-        part.replace(path)
-    digest = hashlib.file_digest(path.open("rb"), "sha256").hexdigest()
+    candidate = path if path.is_file() else part
+    with candidate.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
     if name in EXPECTED_SHA256 and digest != EXPECTED_SHA256[name]:
         raise ValueError(f"SHA-256 mismatch for {name}; inspect the file before replacing it")
+    if candidate != path:
+        candidate.replace(path)
     print(f"READY {name} {path.stat().st_size} {digest}", flush=True)
     return name, {"url": url, "sha256": digest, "bytes": path.stat().st_size}
 
 
 def main():
     WEIGHTS.mkdir(parents=True, exist_ok=True)
-    info = requests.get(f"https://huggingface.co/api/models/Idiap/FaceLLM-1B/revision/{REVISION}", timeout=60)
-    info.raise_for_status()
     assets = dict(ASSETS)
-    for file in info.json()["siblings"]:
-        name = file["rfilename"]
-        if name.startswith("model/"):
-            assets["FaceLLM-1B/" + name] = f"https://huggingface.co/Idiap/FaceLLM-1B/resolve/{REVISION}/{name}"
     # Public release assets, rather than an assumed filename or an ImageNet checkpoint.
     release = requests.get("https://github.com/yu4u/age-estimation-pytorch/releases/expanded_assets/v1.0", timeout=60)
     release.raise_for_status()
@@ -103,7 +110,7 @@ def main():
             except Exception as error:
                 failures[futures[future]] = str(error)
                 print("FAILED", futures[future], str(error), flush=True)
-    (WEIGHTS / "manifest.json").write_text(json.dumps({"facellm_revision": REVISION, "files": results, "failures": failures}, indent=2), encoding="utf-8")
+    (WEIGHTS / "manifest.json").write_text(json.dumps({"internvl_revision": MODEL_REVISION, "files": results, "failures": failures}, indent=2), encoding="utf-8")
     if failures:
         raise SystemExit(1)
 

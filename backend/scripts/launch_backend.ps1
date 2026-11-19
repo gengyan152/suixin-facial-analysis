@@ -19,7 +19,7 @@ if (Test-Path $LocalEnvFile) {
 
 function Test-BackendDeps([string]$PyExe) {
     try {
-        & $PyExe -c "import uvicorn, fastapi, torch, cv2, mediapipe, transformers" 2>$null | Out-Null
+        & $PyExe -c "import uvicorn, fastapi, torch, cv2, mediapipe, transformers, peft" 2>$null | Out-Null
         return ($LASTEXITCODE -eq 0)
     } catch {
         return $false
@@ -72,7 +72,9 @@ function Resolve-BackendPython([string]$Requested, [string]$ProjectRoot, [string
 
 $PythonExe = Resolve-BackendPython -Requested $Python -ProjectRoot $RootDir -BackendPath $BackendDir
 $WeightsDir = Join-Path $BackendDir "weights"
-if (-not (Test-Path (Join-Path $WeightsDir "FaceLLM-1B\model"))) {
+if (-not (Test-Path (Join-Path $WeightsDir "InternVL3-2B-hf\model.safetensors")) -or
+    -not (Test-Path (Join-Path $WeightsDir "InternVL3-2B-face-lora\adapter_model.safetensors")) -or
+    -not (Test-Path (Join-Path $WeightsDir "InternVL3-2B-face-lora\adapter_config.json"))) {
     Write-Warning "Model weights were not found under $WeightsDir. Run 'python backend/scripts/download_weights.py' and 'python backend/scripts/prepare_age.py' first."
 }
 

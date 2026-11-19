@@ -75,6 +75,10 @@ def test_real_api_complete_and_selection(live_pipeline):
         with TestClient(app) as client:
             health = Health.model_validate(client.get("/api/v1/health").json())
             assert health.warmed_up
+            assert health.models["face_gate"].version == "OpenGVLab/InternVL3-2B-hf"
+            assert health.models["description"].loaded
+            assert health.models["description"].version == "OpenGVLab/InternVL3-2B-hf + LoRA"
+            assert p.llm.processor.image_processor.max_patches == 1
             assert health.models["beauty_2dfap"].weights_status == "trained_fold1"
             assert health.models["beauty_2dfap"].weights_ready is True
             raw = (p.settings.weights / "warmup.jpg").read_bytes()
@@ -87,6 +91,7 @@ def test_real_api_complete_and_selection(live_pipeline):
             assert result["scores"]["weights_ready"] is True
             assert result["scores"]["weights_status"] == "trained_fold1"
             assert result["model_versions"]["age"].endswith("(appa_real_pretrained)")
+            assert result["model_versions"]["text"] == health.models["description"].version
             history = app.state.service.tasks[task["task_id"]].history
             assert history == ["queued", "processing", "scores_ready", "completed"]
             artifact = client.get(result["original_image_url"])

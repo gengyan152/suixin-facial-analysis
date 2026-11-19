@@ -8,7 +8,7 @@ import time
 import uuid
 
 from .config import ETHICS, REJECTIONS, GateRejected
-from .facellm import FIELD_LABELS, compose_narrative
+from .vlm import FIELD_LABELS, compose_narrative
 from .imaging import jpeg
 
 logger = logging.getLogger(__name__)
@@ -232,7 +232,7 @@ class TaskService:
             versions = {
                 "beauty": f"2d_fap_mobilenetv2 ({self.pipeline.models['beauty_2dfap']['weights_status']})",
                 "age": f"se_resnext50_appa_real ({self.pipeline.models['apparent_age']['weights_status']})",
-                "text": "Idiap/FaceLLM-1B",
+                "text": self.pipeline.models["description"]["version"],
             }
             original_url = f"/api/v1/tasks/{task.task_id}/artifacts/normalized.jpg"
             if not self._publish(task, "scores_ready", scores=scores, target_face=context["target_face"], model_versions=versions, original_image_url=original_url):
